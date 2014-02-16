@@ -75,7 +75,7 @@ void click_config_provider(Window *window) {
 }
 
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed) {
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "automatic refresh");
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "automatic refresh (%d)", units_changed);
 	get_schedule_info();
 }
 
@@ -223,8 +223,8 @@ void init() {
 	
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
+	//register automatic refresh to refresh every minute (will also fire once it's registered)
 	tick_timer_service_subscribe(MINUTE_UNIT, automatic_refresh_callback);
-	get_schedule_info();
 }
 
 void deinit(void) {
