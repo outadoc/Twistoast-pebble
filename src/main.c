@@ -29,13 +29,17 @@ void clear_status_message();
 void set_example_stop_data();
 void get_schedule_info();
 void clear_labels();
+void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResult reason, void *context);
+void app_message_received_fail_handler(AppMessageResult reason, void *context);
+void app_message_received_handler(DictionaryIterator *iter, void *context);
+
 
 Window *window;
 ActionBarLayer *actionBar;
 TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status;
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
-int16_t current_stop_index = 0;
+uint8_t current_stop_index = 0;
 
 //click up (previous item)
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
@@ -97,15 +101,14 @@ void get_schedule_info() {
 
 void display_status_message(int status) {
 	clear_labels();
-	clear_status_message();
-	
-	layer_set_hidden((Layer*) txt_status, 0);
 	
 	if(status == 0) {
 		text_layer_set_text(txt_status, "Chargement...");
 	} else {
 		text_layer_set_text(txt_status, "Erreur.");
 	}
+	
+	layer_set_hidden((Layer*) txt_status, 0);
 }
 
 void clear_status_message() {
@@ -146,6 +149,11 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 
 void app_message_received_fail_handler(AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "incoming message was dropped (reason: %d)", reason);
+	display_status_message(1);
+}
+
+void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "outgoing message failed to send (reason: %d)", reason);
 	display_status_message(1);
 }
 
@@ -195,9 +203,12 @@ void init() {
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_UP, bmp_upArrow);
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_SELECT, bmp_refresh);
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
-		
+	
+	//initialize app message handlers
 	app_message_register_inbox_received(app_message_received_handler); 
 	app_message_register_inbox_dropped(app_message_received_fail_handler);
+	app_message_register_outbox_failed(app_message_sent_fail_handler);
+	
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
 	get_schedule_info();
