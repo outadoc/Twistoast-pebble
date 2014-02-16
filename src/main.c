@@ -34,6 +34,7 @@ void clear_labels();
 void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResult reason, void *context);
 void app_message_received_fail_handler(AppMessageResult reason, void *context);
 void app_message_received_handler(DictionaryIterator *iter, void *context);
+void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed);
 
 
 Window *window;
@@ -71,6 +72,11 @@ void click_config_provider(Window *window) {
 	window_single_click_subscribe(BUTTON_ID_UP, (ClickHandler) up_single_click_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, (ClickHandler) down_single_click_handler);
 	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) select_single_click_handler);
+}
+
+void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed) {
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "automatic refresh");
+	get_schedule_info();
 }
 
 void display_schedule_info(StopInfo info) {
@@ -207,6 +213,9 @@ void init() {
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_SELECT, bmp_refresh);
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
 	
+	//get bus index in persistant memory
+	current_stop_index = persist_read_int(BUS_INDEX);
+	
 	//initialize app message handlers
 	app_message_register_inbox_received(app_message_received_handler); 
 	app_message_register_inbox_dropped(app_message_received_fail_handler);
@@ -214,10 +223,13 @@ void init() {
 	
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
+	tick_timer_service_subscribe(MINUTE_UNIT, automatic_refresh_callback);
 	get_schedule_info();
 }
 
 void deinit(void) {
+	persist_write_int(BUS_INDEX, current_stop_index);
+	
   	text_layer_destroy(txt_line);
 	text_layer_destroy(txt_direction);
 	text_layer_destroy(txt_stop);
