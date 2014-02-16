@@ -79,8 +79,8 @@ void display_schedule_info(StopInfo info) {
 void get_schedule_info() {
 	DictionaryIterator *iter;
 	
-    display_status_message(0);
-    app_message_outbox_begin(&iter);
+	display_status_message(0);
+	app_message_outbox_begin(&iter);
 
 	//iterator will be null on failure, so bail
 	if(iter == NULL) return;
