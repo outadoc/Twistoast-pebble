@@ -77,24 +77,21 @@ void display_schedule_info(StopInfo info) {
 }
 
 void get_schedule_info() {
-	display_status_message(0);
-	
 	DictionaryIterator *iter;
 	
-    //open up the message outbox for writing
+    display_status_message(0);
     app_message_outbox_begin(&iter);
 
-    //iterator will be null on failure, so bail
-    if(iter == NULL)
-        return;
+	//iterator will be null on failure, so bail
+	if(iter == NULL) return;
 
-    dict_write_int8(iter, TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
+	dict_write_int8(iter, TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
 	dict_write_int16(iter, BUS_INDEX, (int16_t) current_stop_index);
-	
-    dict_write_end(iter);
 
-    //sends the outbound dictionary
-    app_message_outbox_send();
+	dict_write_end(iter);
+
+	//sends the outbound dictionary
+	app_message_outbox_send();
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "request sent!");
 }
 
@@ -128,7 +125,7 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	
 	Tuple* type = dict_find(iter, TWISTOAST_MESSAGE_TYPE);
 	Tuple* line = dict_find(iter, BUS_LINE_NAME);
-	Tuple* dir 	= dict_find(iter, BUS_DIRECTION_NAME);
+	Tuple* dir  = dict_find(iter, BUS_DIRECTION_NAME);
 	Tuple* stop = dict_find(iter, BUS_STOP_NAME);
 	Tuple* sch1 = dict_find(iter, BUS_NEXT_SCHEDULE);
 	Tuple* sch2 = dict_find(iter, BUS_SECOND_SCHEDULE);
