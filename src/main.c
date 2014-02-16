@@ -235,6 +235,7 @@ void deinit(void) {
 	text_layer_destroy(txt_stop);
 	text_layer_destroy(txt_schedule1);
 	text_layer_destroy(txt_schedule2);
+	text_layer_destroy(txt_status);
 	
 	gbitmap_destroy(bmp_upArrow);
 	gbitmap_destroy(bmp_downArrow);
