@@ -1,0 +1,40 @@
+{
+    "versionLabel": "1.0",
+    "uuid": "020f9398-c407-454b-996c-6ac341337281",
+    "appKeys": {},
+    "longName": "Twistoast",
+    "versionCode": 1,
+    "capabilities": [
+        ""
+    ],
+    "shortName": "Twistoast",
+    "companyName": "outa[dev]",
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": [
+            {
+                "menuIcon": true,
+                "type": "png",
+                "name": "IMAGE_TWISTO",
+                "file": "images/pbl_icon.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_ARROW_UP",
+                "file": "images/up.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_ARROW_DOWN",
+                "file": "images/down.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_REFRESH",
+                "file": "images/refresh.png"
+            }
+        ]
+    }
+}
