@@ -15,6 +15,7 @@
 #define BUS_NEXT_SCHEDULE 0x24
 #define BUS_SECOND_SCHEDULE 0x25
 
+
 typedef struct {
 	char *line;
 	char *stop;
@@ -22,6 +23,7 @@ typedef struct {
 	char *schedule1;
 	char *schedule2;
 } StopInfo;
+
 
 void display_schedule_info(StopInfo);
 void display_status_message();
@@ -40,6 +42,7 @@ TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, 
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
 uint8_t current_stop_index = 0;
+
 
 //click up (previous item)
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
