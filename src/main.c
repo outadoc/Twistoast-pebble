@@ -15,6 +15,8 @@
 #define BUS_NEXT_SCHEDULE 0x24
 #define BUS_SECOND_SCHEDULE 0x25
 
+#define SHOULD_VIBRATE 0x30
+
 
 typedef struct {
 	char *line;
@@ -47,11 +49,9 @@ uint8_t current_stop_index = 0;
 
 //click up (previous item)
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
-	if(current_stop_index-1 >= 0) {
-		current_stop_index--;
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "requested previous stop (%d)", current_stop_index);
-		get_schedule_info();
-	}
+	current_stop_index--;
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested previous stop (%d)", current_stop_index);
+	get_schedule_info();
 }
 
 //click down (next item)
@@ -141,8 +141,14 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple* stop = dict_find(iter, BUS_STOP_NAME);
 	Tuple* sch1 = dict_find(iter, BUS_NEXT_SCHEDULE);
 	Tuple* sch2 = dict_find(iter, BUS_SECOND_SCHEDULE);
+	Tuple* shouldVibrate = dict_find(iter, SHOULD_VIBRATE);
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
+		if(shouldVibrate != NULL && shouldVibrate->value->int8 == 1) {
+			APP_LOG(APP_LOG_LEVEL_DEBUG, "vibrating!");
+			vibes_double_pulse();
+		}
+		
 		display_schedule_info((StopInfo) {
 			.line = line->value->cstring,
 			.direction = dir->value->cstring,
