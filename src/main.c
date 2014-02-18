@@ -1,5 +1,6 @@
 #include <pebble.h>
 
+//bus stop info structure
 typedef struct {
 	char *line;
 	char *stop;
@@ -21,12 +22,16 @@ void app_message_received_handler(DictionaryIterator *iter, void *context);
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed);
 
 
+//enum for appmessage keys and values
 enum {
+	//message type key
 	KEY_TWISTOAST_MESSAGE_TYPE = 0x00,
 	
+	//message type values
 	BUS_STOP_REQUEST = 0x10,
 	BUS_STOP_DATA_RESPONSE = 0x11,
 	
+	//stop values
 	KEY_STOP_INDEX = 0x20,
 	KEY_BUS_STOP_NAME = 0x21,
 	KEY_BUS_DIRECTION_NAME = 0x22,
@@ -34,6 +39,7 @@ enum {
 	KEY_BUS_NEXT_SCHEDULE = 0x24,
 	KEY_BUS_SECOND_SCHEDULE = 0x25,
 	
+	//will be sent as "1" if the pebble should vibrate when the message is received
 	KEY_SHOULD_VIBRATE = 0x30
 };
 
@@ -43,6 +49,7 @@ ActionBarLayer *actionBar;
 TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status;
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
+//current index of the displayed stop
 uint8_t current_stop_index = 0;
 
 
@@ -73,11 +80,13 @@ void click_config_provider(Window *window) {
 	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) select_single_click_handler);
 }
 
+//called every minute
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "automatic refresh (%d)", units_changed);
 	get_schedule_info();
 }
 
+//displays a StopInfo structure on screen
 void display_schedule_info(StopInfo info) {
 	clear_status_message();
 	
@@ -88,6 +97,7 @@ void display_schedule_info(StopInfo info) {
 	text_layer_set_text(txt_schedule2, info.schedule2);
 }
 
+//requests current schedule info
 void get_schedule_info() {
 	DictionaryIterator *iter;
 	
@@ -107,6 +117,7 @@ void get_schedule_info() {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "request sent!");
 }
 
+//displays a status message. 0 = loading, 1 = error
 void display_status_message(int status) {
 	clear_labels();
 	
@@ -119,10 +130,12 @@ void display_status_message(int status) {
 	layer_set_hidden((Layer*) txt_status, 0);
 }
 
+//clears status message
 void clear_status_message() {
 	layer_set_hidden((Layer*) txt_status, 1);
 }
 
+//clears everything (except status label)
 void clear_labels() {
 	text_layer_set_text(txt_line, "");
 	text_layer_set_text(txt_stop, "");
@@ -131,6 +144,7 @@ void clear_labels() {
 	text_layer_set_text(txt_schedule2, "");
 }
 
+//called when a message is received
 void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "message received");
 	
@@ -144,11 +158,13 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
 	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
+		//decide if we should make the pebble vibrate
 		if(shouldVibrate != NULL && shouldVibrate->value->int8 == 1) {
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "vibrating!");
 			vibes_double_pulse();
 		}
 		
+		//display what we got
 		display_schedule_info((StopInfo) {
 			.line = line->value->cstring,
 			.direction = dir->value->cstring,
@@ -162,11 +178,13 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	}
 }
 
+//called when message failed to be received
 void app_message_received_fail_handler(AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "incoming message was dropped (reason: %d)", reason);
 	display_status_message(1);
 }
 
+//called when message failed to send
 void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "outgoing message failed to send (reason: %d)", reason);
 	display_status_message(1);
