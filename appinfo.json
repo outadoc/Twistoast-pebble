@@ -15,15 +15,9 @@
     "resources": {
         "media": [
             {
-                "menuIcon": true,
                 "type": "png",
-                "name": "IMAGE_TWISTO",
-                "file": "images/pbl_icon.png"
-            },
-            {
-                "type": "png",
-                "name": "IMAGE_ARROW_UP",
-                "file": "images/up.png"
+                "name": "IMAGE_REFRESH",
+                "file": "images/refresh.png"
             },
             {
                 "type": "png",
@@ -32,8 +26,14 @@
             },
             {
                 "type": "png",
-                "name": "IMAGE_REFRESH",
-                "file": "images/refresh.png"
+                "name": "IMAGE_ARROW_UP",
+                "file": "images/up.png"
+            },
+            {
+                "menuIcon": true,
+                "type": "png",
+                "name": "IMAGE_TWISTO",
+                "file": "images/pbl_icon.png"
             }
         ]
     }

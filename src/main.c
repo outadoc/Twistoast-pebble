@@ -1,22 +1,20 @@
 #include <pebble.h>
 
-//message type key
-#define TWISTOAST_MESSAGE_TYPE 0x00
-
-//message type value
-#define BUS_STOP_REQUEST 0x10
-#define BUS_STOP_DATA_RESPONSE 0x11
-
-//message keys
-#define BUS_INDEX 0x20
-#define BUS_STOP_NAME 0x21
-#define BUS_DIRECTION_NAME 0x22
-#define BUS_LINE_NAME 0x23
-#define BUS_NEXT_SCHEDULE 0x24
-#define BUS_SECOND_SCHEDULE 0x25
-
-#define SHOULD_VIBRATE 0x30
-
+enum {
+	KEY_TWISTOAST_MESSAGE_TYPE = 0x00,
+	
+	BUS_STOP_REQUEST = 0x10,
+	BUS_STOP_DATA_RESPONSE = 0x11,
+	
+	KEY_BUS_INDEX = 0x20,
+	KEY_BUS_STOP_NAME = 0x21,
+	KEY_BUS_DIRECTION_NAME = 0x22,
+	KEY_BUS_LINE_NAME = 0x23,
+	KEY_BUS_NEXT_SCHEDULE = 0x24,
+	KEY_BUS_SECOND_SCHEDULE = 0x25,
+	
+	KEY_SHOULD_VIBRATE = 0x30
+};
 
 typedef struct {
 	char *line;
@@ -98,8 +96,8 @@ void get_schedule_info() {
 	//iterator will be null on failure, so bail
 	if(iter == NULL) return;
 
-	dict_write_int8(iter, TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
-	dict_write_int16(iter, BUS_INDEX, (int16_t) current_stop_index);
+	dict_write_int8(iter, KEY_TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
+	dict_write_int16(iter, KEY_BUS_INDEX, (int16_t) current_stop_index);
 
 	dict_write_end(iter);
 
@@ -135,13 +133,13 @@ void clear_labels() {
 void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "message received");
 	
-	Tuple* type = dict_find(iter, TWISTOAST_MESSAGE_TYPE);
-	Tuple* line = dict_find(iter, BUS_LINE_NAME);
-	Tuple* dir  = dict_find(iter, BUS_DIRECTION_NAME);
-	Tuple* stop = dict_find(iter, BUS_STOP_NAME);
-	Tuple* sch1 = dict_find(iter, BUS_NEXT_SCHEDULE);
-	Tuple* sch2 = dict_find(iter, BUS_SECOND_SCHEDULE);
-	Tuple* shouldVibrate = dict_find(iter, SHOULD_VIBRATE);
+	Tuple* type = dict_find(iter, KEY_TWISTOAST_MESSAGE_TYPE);
+	Tuple* line = dict_find(iter, KEY_BUS_LINE_NAME);
+	Tuple* dir  = dict_find(iter, KEY_BUS_DIRECTION_NAME);
+	Tuple* stop = dict_find(iter, KEY_BUS_STOP_NAME);
+	Tuple* sch1 = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
+	Tuple* sch2 = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
+	Tuple* shouldVibrate = dict_find(iter, KEY_SHOULD_VIBRATE);
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
 		if(shouldVibrate != NULL && shouldVibrate->value->int8 == 1) {
@@ -220,7 +218,7 @@ void init() {
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
 	
 	//get bus index in persistant memory
-	current_stop_index = persist_read_int(BUS_INDEX);
+	current_stop_index = persist_read_int(KEY_BUS_INDEX);
 	
 	//initialize app message handlers
 	app_message_register_inbox_received(app_message_received_handler); 
@@ -234,7 +232,7 @@ void init() {
 }
 
 void deinit(void) {
-	persist_write_int(BUS_INDEX, current_stop_index);
+	persist_write_int(KEY_BUS_INDEX, current_stop_index);
 	
   	text_layer_destroy(txt_line);
 	text_layer_destroy(txt_direction);
