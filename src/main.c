@@ -107,6 +107,7 @@ void get_schedule_info() {
 	//iterator will be null on failure, so bail
 	if(iter == NULL) return;
 
+	//we're making a stop request, so add that, and also add the said index
 	dict_write_int8(iter, KEY_TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
 	dict_write_int16(iter, KEY_STOP_INDEX, (int16_t) current_stop_index);
 
