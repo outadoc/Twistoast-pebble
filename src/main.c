@@ -1,21 +1,5 @@
 #include <pebble.h>
 
-enum {
-	KEY_TWISTOAST_MESSAGE_TYPE = 0x00,
-	
-	BUS_STOP_REQUEST = 0x10,
-	BUS_STOP_DATA_RESPONSE = 0x11,
-	
-	KEY_BUS_INDEX = 0x20,
-	KEY_BUS_STOP_NAME = 0x21,
-	KEY_BUS_DIRECTION_NAME = 0x22,
-	KEY_BUS_LINE_NAME = 0x23,
-	KEY_BUS_NEXT_SCHEDULE = 0x24,
-	KEY_BUS_SECOND_SCHEDULE = 0x25,
-	
-	KEY_SHOULD_VIBRATE = 0x30
-};
-
 typedef struct {
 	char *line;
 	char *stop;
@@ -35,6 +19,23 @@ void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResul
 void app_message_received_fail_handler(AppMessageResult reason, void *context);
 void app_message_received_handler(DictionaryIterator *iter, void *context);
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed);
+
+
+enum {
+	KEY_TWISTOAST_MESSAGE_TYPE = 0x00,
+	
+	BUS_STOP_REQUEST = 0x10,
+	BUS_STOP_DATA_RESPONSE = 0x11,
+	
+	KEY_STOP_INDEX = 0x20,
+	KEY_BUS_STOP_NAME = 0x21,
+	KEY_BUS_DIRECTION_NAME = 0x22,
+	KEY_BUS_LINE_NAME = 0x23,
+	KEY_BUS_NEXT_SCHEDULE = 0x24,
+	KEY_BUS_SECOND_SCHEDULE = 0x25,
+	
+	KEY_SHOULD_VIBRATE = 0x30
+};
 
 
 Window *window;
@@ -97,7 +98,7 @@ void get_schedule_info() {
 	if(iter == NULL) return;
 
 	dict_write_int8(iter, KEY_TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
-	dict_write_int16(iter, KEY_BUS_INDEX, (int16_t) current_stop_index);
+	dict_write_int16(iter, KEY_STOP_INDEX, (int16_t) current_stop_index);
 
 	dict_write_end(iter);
 
@@ -141,7 +142,8 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple* sch2 = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
 	Tuple* shouldVibrate = dict_find(iter, KEY_SHOULD_VIBRATE);
 	
-	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
+	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
+	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
 		if(shouldVibrate != NULL && shouldVibrate->value->int8 == 1) {
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "vibrating!");
 			vibes_double_pulse();
@@ -218,7 +220,7 @@ void init() {
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
 	
 	//get bus index in persistant memory
-	current_stop_index = persist_read_int(KEY_BUS_INDEX);
+	current_stop_index = persist_read_int(KEY_STOP_INDEX);
 	
 	//initialize app message handlers
 	app_message_register_inbox_received(app_message_received_handler); 
@@ -232,7 +234,7 @@ void init() {
 }
 
 void deinit(void) {
-	persist_write_int(KEY_BUS_INDEX, current_stop_index);
+	persist_write_int(KEY_STOP_INDEX, current_stop_index);
 	
   	text_layer_destroy(txt_line);
 	text_layer_destroy(txt_direction);
