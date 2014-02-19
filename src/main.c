@@ -201,8 +201,8 @@ void init() {
 
 	//set text placement
 	txt_line = text_layer_create(GRect(5, 0, 140 - ACTION_BAR_WIDTH, 32));
-	txt_direction = text_layer_create(GRect(5, 33, 140 - ACTION_BAR_WIDTH, 27));
-	txt_stop = text_layer_create(GRect(5, 58, 140 - ACTION_BAR_WIDTH, 27));
+	txt_direction = text_layer_create(GRect(5, 33, 140 - ACTION_BAR_WIDTH, 30));
+	txt_stop = text_layer_create(GRect(5, 60, 140 - ACTION_BAR_WIDTH, 30));
 	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 28));
 	txt_schedule2 = text_layer_create(GRect(5, 118, 140 - ACTION_BAR_WIDTH, 28));
 	txt_status = text_layer_create(GRect(5, 58, 140 - ACTION_BAR_WIDTH, 28));
@@ -267,7 +267,7 @@ void deinit(void) {
 	gbitmap_destroy(bmp_refresh);
 	
 	action_bar_layer_destroy(actionBar);
-	
+	app_message_deregister_callbacks();
 	window_destroy(window);
 }
 
