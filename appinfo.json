@@ -1,40 +1,40 @@
 {
-    "versionLabel": "1.0",
-    "uuid": "020f9398-c407-454b-996c-6ac341337281",
-    "appKeys": {},
-    "longName": "Twistoast",
-    "versionCode": 1,
-    "capabilities": [
-        ""
-    ],
     "shortName": "Twistoast",
-    "companyName": "outa[dev]",
-    "watchapp": {
-        "watchface": false
-    },
+    "versionCode": 1,
     "resources": {
         "media": [
             {
-                "type": "png",
-                "name": "IMAGE_REFRESH",
-                "file": "images/refresh.png"
-            },
-            {
-                "type": "png",
-                "name": "IMAGE_ARROW_DOWN",
-                "file": "images/down.png"
-            },
-            {
-                "type": "png",
-                "name": "IMAGE_ARROW_UP",
-                "file": "images/up.png"
-            },
-            {
                 "menuIcon": true,
-                "type": "png",
+                "file": "images/pbl_icon.png",
                 "name": "IMAGE_TWISTO",
-                "file": "images/pbl_icon.png"
+                "type": "png"
+            },
+            {
+                "file": "images/up.png",
+                "name": "IMAGE_ARROW_UP",
+                "type": "png"
+            },
+            {
+                "file": "images/down.png",
+                "name": "IMAGE_ARROW_DOWN",
+                "type": "png"
+            },
+            {
+                "file": "images/refresh.png",
+                "name": "IMAGE_REFRESH",
+                "type": "png"
             }
         ]
-    }
+    },
+    "uuid": "020f9398-c407-454b-996c-6ac341337281",
+    "versionLabel": "1.0",
+    "companyName": "outa[dev]",
+    "capabilities": [
+        ""
+    ],
+    "longName": "Twistoast",
+    "watchapp": {
+        "watchface": false
+    },
+    "appKeys": {}
 }

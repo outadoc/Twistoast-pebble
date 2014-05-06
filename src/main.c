@@ -1,5 +1,8 @@
 #include <pebble.h>
 
+#define STOP_INDEX_LONG_JUMP 3
+#define LONG_CLICK_DELAY 800
+
 //bus stop info structure
 typedef struct {
 	char *line;
@@ -60,10 +63,24 @@ void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	get_schedule_info();
 }
 
+//long click up (previous item - 3)
+void up_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
+	current_stop_index -= STOP_INDEX_LONG_JUMP;
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested waaay previous stop (%d)", current_stop_index);
+	get_schedule_info();
+}
+
 //click down (next item)
 void down_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index++;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested next stop (%d)", current_stop_index);
+	get_schedule_info();
+}
+
+//long click down (next item + 3)
+void down_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
+	current_stop_index += STOP_INDEX_LONG_JUMP;
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested waaay next stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
@@ -73,11 +90,21 @@ void select_single_click_handler(ClickRecognizerRef recognizer, Window *window) 
 	get_schedule_info();
 }
 
+//long click select (goto item 0)
+void select_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
+	current_stop_index = 0;
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "goto stop 0");
+	get_schedule_info();
+}
+
 //click config
 void click_config_provider(Window *window) {	
 	window_single_click_subscribe(BUTTON_ID_UP, (ClickHandler) up_single_click_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, (ClickHandler) down_single_click_handler);
 	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) select_single_click_handler);
+	window_long_click_subscribe(BUTTON_ID_UP, LONG_CLICK_DELAY, (ClickHandler) up_long_click_handler, NULL);
+	window_long_click_subscribe(BUTTON_ID_DOWN, LONG_CLICK_DELAY, (ClickHandler) down_long_click_handler, NULL);
+	window_long_click_subscribe(BUTTON_ID_SELECT, LONG_CLICK_DELAY, (ClickHandler) select_long_click_handler, NULL);
 }
 
 //called every minute
