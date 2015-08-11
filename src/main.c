@@ -125,20 +125,31 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
     
     APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", schedule_dir);
     
-    // If schedule_dir[0] is a capital letter, add it to the front of the string
+    // If schedule_dir[0] is a capital letter, add it to the front of the string (it's the line)
     if(schedule_dir[0] >= 65 && schedule_dir[0] <= 90) {
         snprintf(dir, 4, "%c: ", schedule_dir[0]);
     } else {
         dir[0] = '\0';
     }
     
+    // Get the actual absolute time of the schedule
+    time_t stop_time = time(NULL) + seconds;
+    struct tm *stop_time_info = localtime(&stop_time);
+        
     if(millis_before_bus == -1) {
+        // No stop for this bus
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "Pas d'arrêt");
     } else if(seconds <= 0) {
+        // Currently at stop
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sÀ l'arrêt", dir);
     } else if(seconds <= 60) {
+        // Bus is incoming
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sImminent", dir);
+    } else if(seconds > 3600) {
+        // Display absolute time because the bus isn't coming any time soon
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%02d:%02d", dir, stop_time_info->tm_hour, stop_time_info->tm_min);
     } else {
+        // Just display a countdown!
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%d minutes", dir, seconds / 60);
     }
 }
