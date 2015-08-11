@@ -3,7 +3,6 @@
 
 Window *window;
 TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status, *txt_header_bg;
-GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
 // Current index of the displayed stop
 uint8_t current_stop_index = 0;
@@ -301,11 +300,7 @@ void deinit(void) {
 	text_layer_destroy(txt_schedule1);
 	text_layer_destroy(txt_schedule2);
 	text_layer_destroy(txt_status);
-	
-	gbitmap_destroy(bmp_upArrow);
-	gbitmap_destroy(bmp_downArrow);
-	gbitmap_destroy(bmp_refresh);
-	
+
 	app_message_deregister_callbacks();
 	window_destroy(window);
 }
