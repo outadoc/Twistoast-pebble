@@ -1,12 +1,16 @@
 {
-    "shortName": "Twistoast",
-    "versionCode": 1,
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "outa[dev]",
+    "longName": "Twistoast",
+    "projectType": "native",
     "resources": {
         "media": [
             {
-                "menuIcon": true,
-                "file": "images/pbl_icon.png",
-                "name": "IMAGE_TWISTO",
+                "file": "images/refresh.png",
+                "name": "IMAGE_REFRESH",
                 "type": "png"
             },
             {
@@ -20,21 +24,22 @@
                 "type": "png"
             },
             {
-                "file": "images/refresh.png",
-                "name": "IMAGE_REFRESH",
+                "file": "images/pbl_icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_TWISTO",
                 "type": "png"
             }
         ]
     },
-    "uuid": "020f9398-c407-454b-996c-6ac341337281",
-    "versionLabel": "1.0",
-    "companyName": "outa[dev]",
-    "capabilities": [
-        ""
+    "sdkVersion": "3",
+    "shortName": "Twistoast",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
     ],
-    "longName": "Twistoast",
+    "uuid": "020f9398-c407-454b-996c-6ac341337281",
+    "versionLabel": "1.1",
     "watchapp": {
         "watchface": false
-    },
-    "appKeys": {}
+    }
 }
