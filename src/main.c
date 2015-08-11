@@ -2,14 +2,17 @@
 
 #define STOP_INDEX_LONG_JUMP 3
 #define LONG_CLICK_DELAY 800
+#define SCHEDULE_STR_SIZE 32
 
 //bus stop info structure
 typedef struct {
 	char *line;
 	char *stop;
 	char *direction;
-	char *schedule1;
-	char *schedule2;
+	int32_t schedule1;
+	int32_t schedule2;
+    char *schedule1_dir;
+    char *schedule2_dir;
 } StopInfo;
 
 
@@ -23,7 +26,7 @@ void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResul
 void app_message_received_fail_handler(AppMessageResult reason, void *context);
 void app_message_received_handler(DictionaryIterator *iter, void *context);
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed);
-
+void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir);
 
 //enum for appmessage keys and values
 enum {
@@ -40,7 +43,9 @@ enum {
 	KEY_BUS_DIRECTION_NAME = 0x22,
 	KEY_BUS_LINE_NAME = 0x23,
 	KEY_BUS_NEXT_SCHEDULE = 0x24,
-	KEY_BUS_SECOND_SCHEDULE = 0x25,
+    KEY_BUS_NEXT_SCHEDULE_DIR = 0x25,
+	KEY_BUS_SECOND_SCHEDULE = 0x26,
+    KEY_BUS_SECOND_SCHEDULE_DIR = 0x27,
 	
 	//will be sent as "1" if the pebble should vibrate when the message is received
 	KEY_SHOULD_VIBRATE = 0x30
@@ -55,6 +60,8 @@ GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 //current index of the displayed stop
 uint8_t current_stop_index = 0;
 
+char final_sch1[SCHEDULE_STR_SIZE];
+char final_sch2[SCHEDULE_STR_SIZE];
 
 //click up (previous item)
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
@@ -116,12 +123,15 @@ void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed) {
 //displays a StopInfo structure on screen
 void display_schedule_info(StopInfo info) {
 	clear_status_message();
-	
+
+    format_schedule_string(final_sch1, info.schedule1, info.schedule1_dir);
+    format_schedule_string(final_sch2, info.schedule2, info.schedule2_dir);
+        
 	text_layer_set_text(txt_line, info.line);
 	text_layer_set_text(txt_stop, info.stop);
 	text_layer_set_text(txt_direction, info.direction);
-	text_layer_set_text(txt_schedule1, info.schedule1);
-	text_layer_set_text(txt_schedule2, info.schedule2);
+	text_layer_set_text(txt_schedule1, final_sch1);
+	text_layer_set_text(txt_schedule2, final_sch2);
 }
 
 //requests current schedule info
@@ -143,6 +153,18 @@ void get_schedule_info() {
 	//sends the outbound dictionary
 	app_message_outbox_send();
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "request sent!");
+}
+
+void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir) {
+    int seconds = (int) millis_before_bus / 1000;
+    
+    if(seconds <= 0) {
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Imminent");
+    } else if(seconds <= 60) {
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "En approche");
+    } else {
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%d minutes", seconds / 60);
+    }
 }
 
 //displays a status message. 0 = loading, 1 = error
@@ -176,18 +198,21 @@ void clear_labels() {
 void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "message received");
 	
-	Tuple* type = dict_find(iter, KEY_TWISTOAST_MESSAGE_TYPE);
-	Tuple* line = dict_find(iter, KEY_BUS_LINE_NAME);
-	Tuple* dir  = dict_find(iter, KEY_BUS_DIRECTION_NAME);
-	Tuple* stop = dict_find(iter, KEY_BUS_STOP_NAME);
-	Tuple* sch1 = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
-	Tuple* sch2 = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
-	Tuple* shouldVibrate = dict_find(iter, KEY_SHOULD_VIBRATE);
+	Tuple* type     = dict_find(iter, KEY_TWISTOAST_MESSAGE_TYPE);
+	Tuple* line     = dict_find(iter, KEY_BUS_LINE_NAME);
+	Tuple* dir      = dict_find(iter, KEY_BUS_DIRECTION_NAME);
+	Tuple* stop     = dict_find(iter, KEY_BUS_STOP_NAME);
+	Tuple* sch1     = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
+    Tuple* sch1_dir = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
+	Tuple* sch2     = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
+    Tuple* sch2_dir = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
+	Tuple* vibrate  = dict_find(iter, KEY_SHOULD_VIBRATE);
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
-	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL) {
+	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL 
+       && sch1_dir != NULL && sch2_dir != NULL) {
 		//decide if we should make the pebble vibrate
-		if(shouldVibrate != NULL && shouldVibrate->value->int8 == 1) {
+		if(vibrate != NULL && vibrate->value->int8 == 1) {
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "vibrating!");
 			vibes_double_pulse();
 		}
@@ -197,8 +222,10 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 			.line = line->value->cstring,
 			.direction = dir->value->cstring,
 			.stop = stop->value->cstring,
-			.schedule1 = sch1->value->cstring,
-			.schedule2 = sch2->value->cstring
+			.schedule1 = sch1->value->int32,
+			.schedule2 = sch2->value->int32,
+            .schedule1_dir = sch1_dir->value->cstring,
+            .schedule2_dir = sch2_dir->value->cstring
 		});
 	} else {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "received message was invalidated");
