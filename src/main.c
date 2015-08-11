@@ -136,8 +136,11 @@ void display_schedule_info(StopInfo info) {
 	text_layer_set_text(txt_schedule2, final_sch2);
     
     #ifdef PBL_COLOR
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "stop color: %ld", info.color);
-        window_set_background_color(window, GColorFromHEX(info.color));
+        if(info.color == 0x00) {
+             window_set_background_color(window, GColorWhite);
+        } else {
+            window_set_background_color(window, GColorFromHEX(info.color));
+        }
     #endif
 }
 
@@ -209,8 +212,6 @@ void clear_labels() {
 	text_layer_set_text(txt_direction, "");
 	text_layer_set_text(txt_schedule1, "");
 	text_layer_set_text(txt_schedule2, "");
-    
-    window_set_background_color(window, GColorWhite);
 }
 
 // Called when a message is received
@@ -304,6 +305,7 @@ void init() {
     text_layer_set_background_color(txt_direction, GColorClear);
     text_layer_set_background_color(txt_schedule1, GColorClear);
     text_layer_set_background_color(txt_schedule2, GColorClear);
+    text_layer_set_background_color(txt_status, GColorClear);
 	
 	// Load bitmaps
 	bmp_upArrow = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARROW_UP);
