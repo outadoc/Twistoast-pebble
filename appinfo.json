@@ -9,21 +9,6 @@
     "resources": {
         "media": [
             {
-                "file": "images/refresh.png",
-                "name": "IMAGE_REFRESH",
-                "type": "png"
-            },
-            {
-                "file": "images/up.png",
-                "name": "IMAGE_ARROW_UP",
-                "type": "png"
-            },
-            {
-                "file": "images/down.png",
-                "name": "IMAGE_ARROW_DOWN",
-                "type": "png"
-            },
-            {
                 "file": "images/pbl_icon.png",
                 "menuIcon": true,
                 "name": "IMAGE_TWISTO",

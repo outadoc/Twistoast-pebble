@@ -183,7 +183,7 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
     } else if(seconds <= 60) {
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sImminent", dir);
     } else {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%d min.", dir, seconds / 60);
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%d minutes", dir, seconds / 60);
     }
 }
 
@@ -276,12 +276,12 @@ void init() {
 	Layer *window_layer = window_get_root_layer(window);
 
 	// Set text placement
-	txt_line = text_layer_create(GRect(5, 0, 140 - ACTION_BAR_WIDTH, 32));
-    txt_stop = text_layer_create(GRect(5, 30, 140 - ACTION_BAR_WIDTH, 35));
-	txt_direction = text_layer_create(GRect(5, 57, 140 - ACTION_BAR_WIDTH, 35));
-	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 35));
-	txt_schedule2 = text_layer_create(GRect(5, 120, 140 - ACTION_BAR_WIDTH, 35));
-	txt_status = text_layer_create(GRect(5, 65, 140 - ACTION_BAR_WIDTH, 28));
+	txt_line = text_layer_create(GRect(5, 0, 140, 32));
+    txt_stop = text_layer_create(GRect(5, 30, 140, 35));
+	txt_direction = text_layer_create(GRect(5, 57, 140, 35));
+	txt_schedule1 = text_layer_create(GRect(5, 90, 140, 35));
+	txt_schedule2 = text_layer_create(GRect(5, 120, 140, 35));
+	txt_status = text_layer_create(GRect(5, 65, 140, 28));
 	
 	// Set text font
 	text_layer_set_font(txt_line, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
@@ -314,8 +314,7 @@ void init() {
 
 	// Initialize action bar
 	actionBar = action_bar_layer_create();
-	action_bar_layer_add_to_window(actionBar, window);
-	action_bar_layer_set_click_config_provider(actionBar, (ClickConfigProvider) click_config_provider);
+	window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
 	
 	// Initialize click handlers
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_UP, bmp_upArrow);
