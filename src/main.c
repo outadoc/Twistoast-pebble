@@ -122,9 +122,7 @@ void get_schedule_info() {
 void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir) {
     int seconds = (int) millis_before_bus / 1000;
     char dir[4];
-    
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", schedule_dir);
-    
+        
     // If schedule_dir[0] is a capital letter, add it to the front of the string (it's the line)
     if(schedule_dir[0] >= 65 && schedule_dir[0] <= 90) {
         snprintf(dir, 4, "%c: ", schedule_dir[0]);
