@@ -255,24 +255,24 @@ void init() {
 
 	//set text placement
 	txt_line = text_layer_create(GRect(5, 0, 140 - ACTION_BAR_WIDTH, 32));
-	txt_direction = text_layer_create(GRect(5, 33, 140 - ACTION_BAR_WIDTH, 30));
-	txt_stop = text_layer_create(GRect(5, 60, 140 - ACTION_BAR_WIDTH, 30));
-	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 28));
-	txt_schedule2 = text_layer_create(GRect(5, 118, 140 - ACTION_BAR_WIDTH, 28));
+    txt_stop = text_layer_create(GRect(5, 30, 140 - ACTION_BAR_WIDTH, 30));
+	txt_direction = text_layer_create(GRect(5, 55, 140 - ACTION_BAR_WIDTH, 30));
+	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 35));
+	txt_schedule2 = text_layer_create(GRect(5, 120, 140 - ACTION_BAR_WIDTH, 35));
 	txt_status = text_layer_create(GRect(5, 58, 140 - ACTION_BAR_WIDTH, 28));
 	
 	//set text font
 	text_layer_set_font(txt_line, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	text_layer_set_font(txt_stop, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	text_layer_set_font(txt_direction, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-	text_layer_set_font(txt_schedule1, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-	text_layer_set_font(txt_schedule2, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+	text_layer_set_font(txt_schedule1, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+	text_layer_set_font(txt_schedule2, fonts_get_system_font(FONT_KEY_GOTHIC_28));
 	text_layer_set_font(txt_status, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	
 	//add text to window
 	layer_add_child(window_layer, text_layer_get_layer(txt_line));
-	layer_add_child(window_layer, text_layer_get_layer(txt_direction));
 	layer_add_child(window_layer, text_layer_get_layer(txt_stop));
+    layer_add_child(window_layer, text_layer_get_layer(txt_direction));
 	layer_add_child(window_layer, text_layer_get_layer(txt_schedule1));
 	layer_add_child(window_layer, text_layer_get_layer(txt_schedule2));
 	layer_add_child(window_layer, text_layer_get_layer(txt_status));
