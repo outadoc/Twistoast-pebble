@@ -182,7 +182,9 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
         dir[0] = '\0';
     }
     
-    if(seconds <= 0) {
+    if(millis_before_bus == -1) {
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Pas d'arrêt");
+    } else if(seconds <= 0) {
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sÀ l'arrêt", dir);
     } else if(seconds <= 60) {
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sImminent", dir);
