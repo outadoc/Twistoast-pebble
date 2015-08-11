@@ -159,9 +159,9 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
     int seconds = (int) millis_before_bus / 1000;
     
     if(seconds <= 0) {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Imminent");
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "En arrêt");
     } else if(seconds <= 60) {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "En approche");
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Imminent");
     } else {
         snprintf(schedule_str, SCHEDULE_STR_SIZE, "%d minutes", seconds / 60);
     }
