@@ -157,13 +157,23 @@ void get_schedule_info() {
 
 void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir) {
     int seconds = (int) millis_before_bus / 1000;
+    char dir[4];
+    
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", schedule_dir);
+    
+    // If schedule_dir[0] is a capital letter, add it to the front of the string
+    if(schedule_dir[0] >= 65 && schedule_dir[0] <= 90) {
+        snprintf(dir, 4, "%c: ", schedule_dir[0]);
+    } else {
+        dir[0] = '\0';
+    }
     
     if(seconds <= 0) {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "En arrêt");
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sÀ l'arrêt", dir);
     } else if(seconds <= 60) {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Imminent");
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sImminent", dir);
     } else {
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%d minutes", seconds / 60);
+        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%d min.", dir, seconds / 60);
     }
 }
 
@@ -174,7 +184,7 @@ void display_status_message(int status) {
 	if(status == 0) {
 		text_layer_set_text(txt_status, "Chargement...");
 	} else {
-		text_layer_set_text(txt_status, "Erreur.");
+		text_layer_set_text(txt_status, "Erreur. \U0001F628");
 	}
 	
 	layer_set_hidden((Layer*) txt_status, 0);
@@ -203,9 +213,9 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple* dir      = dict_find(iter, KEY_BUS_DIRECTION_NAME);
 	Tuple* stop     = dict_find(iter, KEY_BUS_STOP_NAME);
 	Tuple* sch1     = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
-    Tuple* sch1_dir = dict_find(iter, KEY_BUS_NEXT_SCHEDULE);
+    Tuple* sch1_dir = dict_find(iter, KEY_BUS_NEXT_SCHEDULE_DIR);
 	Tuple* sch2     = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
-    Tuple* sch2_dir = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
+    Tuple* sch2_dir = dict_find(iter, KEY_BUS_SECOND_SCHEDULE_DIR);
 	Tuple* vibrate  = dict_find(iter, KEY_SHOULD_VIBRATE);
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
@@ -259,7 +269,7 @@ void init() {
 	txt_direction = text_layer_create(GRect(5, 55, 140 - ACTION_BAR_WIDTH, 30));
 	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 35));
 	txt_schedule2 = text_layer_create(GRect(5, 120, 140 - ACTION_BAR_WIDTH, 35));
-	txt_status = text_layer_create(GRect(5, 58, 140 - ACTION_BAR_WIDTH, 28));
+	txt_status = text_layer_create(GRect(5, 65, 140 - ACTION_BAR_WIDTH, 28));
 	
 	//set text font
 	text_layer_set_font(txt_line, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
