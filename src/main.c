@@ -265,8 +265,8 @@ void init() {
 
 	//set text placement
 	txt_line = text_layer_create(GRect(5, 0, 140 - ACTION_BAR_WIDTH, 32));
-    txt_stop = text_layer_create(GRect(5, 30, 140 - ACTION_BAR_WIDTH, 30));
-	txt_direction = text_layer_create(GRect(5, 55, 140 - ACTION_BAR_WIDTH, 30));
+    txt_stop = text_layer_create(GRect(5, 30, 140 - ACTION_BAR_WIDTH, 35));
+	txt_direction = text_layer_create(GRect(5, 57, 140 - ACTION_BAR_WIDTH, 35));
 	txt_schedule1 = text_layer_create(GRect(5, 90, 140 - ACTION_BAR_WIDTH, 35));
 	txt_schedule2 = text_layer_create(GRect(5, 120, 140 - ACTION_BAR_WIDTH, 35));
 	txt_status = text_layer_create(GRect(5, 65, 140 - ACTION_BAR_WIDTH, 28));
