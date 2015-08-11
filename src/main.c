@@ -182,7 +182,7 @@ void display_status_message(int status) {
 	clear_labels();
 	
 	if(status == 0) {
-		text_layer_set_text(txt_status, "Chargement...");
+		text_layer_set_text(txt_status, "Chargement\u2026");
 	} else {
 		text_layer_set_text(txt_status, "Erreur. \U0001F628");
 	}
