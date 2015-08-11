@@ -55,7 +55,6 @@ enum {
 
 
 Window *window;
-ActionBarLayer *actionBar;
 TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status;
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
@@ -307,19 +306,7 @@ void init() {
     text_layer_set_background_color(txt_schedule2, GColorClear);
     text_layer_set_background_color(txt_status, GColorClear);
 	
-	// Load bitmaps
-	bmp_upArrow = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARROW_UP);
-	bmp_downArrow = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARROW_DOWN);
-	bmp_refresh = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_REFRESH);
-
-	// Initialize action bar
-	actionBar = action_bar_layer_create();
 	window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
-	
-	// Initialize click handlers
-	action_bar_layer_set_icon(actionBar, BUTTON_ID_UP, bmp_upArrow);
-	action_bar_layer_set_icon(actionBar, BUTTON_ID_SELECT, bmp_refresh);
-	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
 	
 	// Get bus index in persistant memory
 	current_stop_index = persist_read_int(KEY_STOP_INDEX);
@@ -349,7 +336,6 @@ void deinit(void) {
 	gbitmap_destroy(bmp_downArrow);
 	gbitmap_destroy(bmp_refresh);
 	
-	action_bar_layer_destroy(actionBar);
 	app_message_deregister_callbacks();
 	window_destroy(window);
 }
