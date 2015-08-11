@@ -4,7 +4,7 @@
 #define LONG_CLICK_DELAY 800
 #define SCHEDULE_STR_SIZE 32
 
-//bus stop info structure
+// Bus stop info structure
 typedef struct {
 	char *line;
 	char *stop;
@@ -13,6 +13,7 @@ typedef struct {
 	int32_t schedule2;
     char *schedule1_dir;
     char *schedule2_dir;
+    int32_t color;
 } StopInfo;
 
 
@@ -28,16 +29,16 @@ void app_message_received_handler(DictionaryIterator *iter, void *context);
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed);
 void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir);
 
-//enum for appmessage keys and values
+// Enum for appmessage keys and values
 enum {
-	//message type key
+	// Message type key
 	KEY_TWISTOAST_MESSAGE_TYPE = 0x00,
 	
-	//message type values
+	// Message type values
 	BUS_STOP_REQUEST = 0x10,
 	BUS_STOP_DATA_RESPONSE = 0x11,
 	
-	//stop values
+	// Stop values
 	KEY_STOP_INDEX = 0x20,
 	KEY_BUS_STOP_NAME = 0x21,
 	KEY_BUS_DIRECTION_NAME = 0x22,
@@ -47,8 +48,9 @@ enum {
 	KEY_BUS_SECOND_SCHEDULE = 0x26,
     KEY_BUS_SECOND_SCHEDULE_DIR = 0x27,
 	
-	//will be sent as "1" if the pebble should vibrate when the message is received
-	KEY_SHOULD_VIBRATE = 0x30
+	// Will be sent as "1" if the pebble should vibrate when the message is received
+	KEY_SHOULD_VIBRATE = 0x30,
+    KEY_BACKGROUND_COLOR = 0x31
 };
 
 
@@ -57,54 +59,54 @@ ActionBarLayer *actionBar;
 TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status;
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
-//current index of the displayed stop
+// Current index of the displayed stop
 uint8_t current_stop_index = 0;
 
 char final_sch1[SCHEDULE_STR_SIZE];
 char final_sch2[SCHEDULE_STR_SIZE];
 
-//click up (previous item)
+// Click up (previous item)
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index--;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested previous stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
-//long click up (previous item - 3)
+// Long click up (previous item - 3)
 void up_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index -= STOP_INDEX_LONG_JUMP;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested waaay previous stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
-//click down (next item)
+// Click down (next item)
 void down_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index++;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested next stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
-//long click down (next item + 3)
+// Long click down (next item + 3)
 void down_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index += STOP_INDEX_LONG_JUMP;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "requested waaay next stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
-//click select (refresh current item)
+// Click select (refresh current item)
 void select_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "refresh stop (%d)", current_stop_index);
 	get_schedule_info();
 }
 
-//long click select (goto item 0)
+// Long click select (goto item 0)
 void select_long_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	current_stop_index = 0;
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "goto stop 0");
 	get_schedule_info();
 }
 
-//click config
+// Click config
 void click_config_provider(Window *window) {	
 	window_single_click_subscribe(BUTTON_ID_UP, (ClickHandler) up_single_click_handler);
 	window_single_click_subscribe(BUTTON_ID_DOWN, (ClickHandler) down_single_click_handler);
@@ -114,13 +116,13 @@ void click_config_provider(Window *window) {
 	window_long_click_subscribe(BUTTON_ID_SELECT, LONG_CLICK_DELAY, (ClickHandler) select_long_click_handler, NULL);
 }
 
-//called every minute
+// Called every minute
 void automatic_refresh_callback(struct tm *tick_time, TimeUnits units_changed) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "automatic refresh (%d)", units_changed);
 	get_schedule_info();
 }
 
-//displays a StopInfo structure on screen
+// Displays a StopInfo structure on screen
 void display_schedule_info(StopInfo info) {
 	clear_status_message();
 
@@ -132,25 +134,30 @@ void display_schedule_info(StopInfo info) {
 	text_layer_set_text(txt_direction, info.direction);
 	text_layer_set_text(txt_schedule1, final_sch1);
 	text_layer_set_text(txt_schedule2, final_sch2);
+    
+    #ifdef PBL_COLOR
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "stop color: %ld", info.color);
+        window_set_background_color(window, GColorFromHEX(info.color));
+    #endif
 }
 
-//requests current schedule info
+// Requests current schedule info
 void get_schedule_info() {
 	DictionaryIterator *iter;
 	
 	display_status_message(0);
 	app_message_outbox_begin(&iter);
 
-	//iterator will be null on failure, so bail
+	// Iterator will be null on failure, so bail
 	if(iter == NULL) return;
 
-	//we're making a stop request, so add that, and also add the said index
+	// We're making a stop request, so add that, and also add the said index
 	dict_write_int8(iter, KEY_TWISTOAST_MESSAGE_TYPE, (int8_t) BUS_STOP_REQUEST);
 	dict_write_int16(iter, KEY_STOP_INDEX, (int16_t) current_stop_index);
 
 	dict_write_end(iter);
 
-	//sends the outbound dictionary
+	// Sends the outbound dictionary
 	app_message_outbox_send();
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "request sent!");
 }
@@ -177,7 +184,7 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
     }
 }
 
-//displays a status message. 0 = loading, 1 = error
+// Displays a status message. 0 = loading, 1 = error
 void display_status_message(int status) {
 	clear_labels();
 	
@@ -190,21 +197,23 @@ void display_status_message(int status) {
 	layer_set_hidden((Layer*) txt_status, 0);
 }
 
-//clears status message
+// Clears status message
 void clear_status_message() {
 	layer_set_hidden((Layer*) txt_status, 1);
 }
 
-//clears everything (except status label)
+// Clears everything (except status label)
 void clear_labels() {
 	text_layer_set_text(txt_line, "");
 	text_layer_set_text(txt_stop, "");
 	text_layer_set_text(txt_direction, "");
 	text_layer_set_text(txt_schedule1, "");
 	text_layer_set_text(txt_schedule2, "");
+    
+    window_set_background_color(window, GColorWhite);
 }
 
-//called when a message is received
+// Called when a message is received
 void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "message received");
 	
@@ -217,6 +226,7 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple* sch2     = dict_find(iter, KEY_BUS_SECOND_SCHEDULE);
     Tuple* sch2_dir = dict_find(iter, KEY_BUS_SECOND_SCHEDULE_DIR);
 	Tuple* vibrate  = dict_find(iter, KEY_SHOULD_VIBRATE);
+    Tuple* color    = dict_find(iter, KEY_BACKGROUND_COLOR);
 	
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
 	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL 
@@ -227,7 +237,7 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 			vibes_double_pulse();
 		}
 		
-		//display what we got
+		// Display what we got
 		display_schedule_info((StopInfo) {
 			.line = line->value->cstring,
 			.direction = dir->value->cstring,
@@ -235,7 +245,8 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 			.schedule1 = sch1->value->int32,
 			.schedule2 = sch2->value->int32,
             .schedule1_dir = sch1_dir->value->cstring,
-            .schedule2_dir = sch2_dir->value->cstring
+            .schedule2_dir = sch2_dir->value->cstring,
+            .color = color->value->int32
 		});
 	} else {
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "received message was invalidated");
@@ -243,27 +254,27 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	}
 }
 
-//called when message failed to be received
+// Called when message failed to be received
 void app_message_received_fail_handler(AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "incoming message was dropped (reason: %d)", reason);
 	display_status_message(1);
 }
 
-//called when message failed to send
+// Called when message failed to send
 void app_message_sent_fail_handler(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "outgoing message failed to send (reason: %d)", reason);
 	display_status_message(1);
 }
 
-//initialize app
+// Initialize app
 void init() {
-	//init window	
+	// Init window	
 	window = window_create();
-	window_stack_push(window, true /* Animated */);
+	window_stack_push(window, true);
 	
 	Layer *window_layer = window_get_root_layer(window);
 
-	//set text placement
+	// Set text placement
 	txt_line = text_layer_create(GRect(5, 0, 140 - ACTION_BAR_WIDTH, 32));
     txt_stop = text_layer_create(GRect(5, 30, 140 - ACTION_BAR_WIDTH, 35));
 	txt_direction = text_layer_create(GRect(5, 57, 140 - ACTION_BAR_WIDTH, 35));
@@ -271,7 +282,7 @@ void init() {
 	txt_schedule2 = text_layer_create(GRect(5, 120, 140 - ACTION_BAR_WIDTH, 35));
 	txt_status = text_layer_create(GRect(5, 65, 140 - ACTION_BAR_WIDTH, 28));
 	
-	//set text font
+	// Set text font
 	text_layer_set_font(txt_line, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
 	text_layer_set_font(txt_stop, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	text_layer_set_font(txt_direction, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
@@ -279,40 +290,47 @@ void init() {
 	text_layer_set_font(txt_schedule2, fonts_get_system_font(FONT_KEY_GOTHIC_28));
 	text_layer_set_font(txt_status, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	
-	//add text to window
+	// Add text to window
 	layer_add_child(window_layer, text_layer_get_layer(txt_line));
 	layer_add_child(window_layer, text_layer_get_layer(txt_stop));
     layer_add_child(window_layer, text_layer_get_layer(txt_direction));
 	layer_add_child(window_layer, text_layer_get_layer(txt_schedule1));
 	layer_add_child(window_layer, text_layer_get_layer(txt_schedule2));
 	layer_add_child(window_layer, text_layer_get_layer(txt_status));
+    
+    // Set text layer backgrounds to be transparent, so that we can see the window background color
+    text_layer_set_background_color(txt_line, GColorClear);
+    text_layer_set_background_color(txt_stop, GColorClear);
+    text_layer_set_background_color(txt_direction, GColorClear);
+    text_layer_set_background_color(txt_schedule1, GColorClear);
+    text_layer_set_background_color(txt_schedule2, GColorClear);
 	
-	//load bitmaps
+	// Load bitmaps
 	bmp_upArrow = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARROW_UP);
 	bmp_downArrow = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_ARROW_DOWN);
 	bmp_refresh = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_REFRESH);
 
-	//initialize action bar
+	// Initialize action bar
 	actionBar = action_bar_layer_create();
 	action_bar_layer_add_to_window(actionBar, window);
 	action_bar_layer_set_click_config_provider(actionBar, (ClickConfigProvider) click_config_provider);
 	
-	//initialize click handlers
+	// Initialize click handlers
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_UP, bmp_upArrow);
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_SELECT, bmp_refresh);
 	action_bar_layer_set_icon(actionBar, BUTTON_ID_DOWN, bmp_downArrow);
 	
-	//get bus index in persistant memory
+	// Get bus index in persistant memory
 	current_stop_index = persist_read_int(KEY_STOP_INDEX);
 	
-	//initialize app message handlers
+	// Initialize app message handlers
 	app_message_register_inbox_received(app_message_received_handler); 
 	app_message_register_inbox_dropped(app_message_received_fail_handler);
 	app_message_register_outbox_failed(app_message_sent_fail_handler);
 	
 	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 	
-	//register automatic refresh to refresh every minute (will also fire once it's registered)
+	// Register automatic refresh to refresh every minute (will also fire once it's registered)
 	tick_timer_service_subscribe(MINUTE_UNIT, automatic_refresh_callback);
 }
 
