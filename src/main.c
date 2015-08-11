@@ -3,6 +3,9 @@
 #define STOP_INDEX_LONG_JUMP 3
 #define LONG_CLICK_DELAY 800
 #define SCHEDULE_STR_SIZE 32
+    
+#define DISPLAY_WIDTH 144
+#define DISPLAY_HEIGHT 168
 
 // Bus stop info structure
 typedef struct {
@@ -55,7 +58,7 @@ enum {
 
 
 Window *window;
-TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status;
+TextLayer *txt_line, *txt_stop, *txt_direction, *txt_schedule1, *txt_schedule2, *txt_status, *txt_header_bg;
 GBitmap *bmp_upArrow, *bmp_downArrow, *bmp_refresh;
 
 // Current index of the displayed stop
@@ -136,9 +139,11 @@ void display_schedule_info(StopInfo info) {
     
     #ifdef PBL_COLOR
         if(info.color == 0x00) {
-             window_set_background_color(window, GColorWhite);
+             //window_set_background_color(window, GColorWhite);
+            text_layer_set_background_color(txt_header_bg, GColorWhite);
         } else {
-            window_set_background_color(window, GColorFromHEX(info.color));
+            //window_set_background_color(window, GColorFromHEX(info.color));
+            text_layer_set_background_color(txt_header_bg, GColorFromHEX(info.color));
         }
     #endif
 }
@@ -275,12 +280,13 @@ void init() {
 	Layer *window_layer = window_get_root_layer(window);
 
 	// Set text placement
-	txt_line = text_layer_create(GRect(5, 0, 140, 32));
-    txt_stop = text_layer_create(GRect(5, 30, 140, 35));
-	txt_direction = text_layer_create(GRect(5, 57, 140, 35));
-	txt_schedule1 = text_layer_create(GRect(5, 90, 140, 35));
-	txt_schedule2 = text_layer_create(GRect(5, 120, 140, 35));
-	txt_status = text_layer_create(GRect(5, 65, 140, 28));
+	txt_line = text_layer_create(GRect(5, 0, DISPLAY_WIDTH - 5, 32));
+    txt_stop = text_layer_create(GRect(5, 30, DISPLAY_WIDTH - 5, 35));
+	txt_direction = text_layer_create(GRect(5, 57, DISPLAY_WIDTH - 5, 35));
+	txt_schedule1 = text_layer_create(GRect(10, 95, DISPLAY_WIDTH - 10, 35));
+	txt_schedule2 = text_layer_create(GRect(10, 125, DISPLAY_WIDTH - 10, 35));
+	txt_status = text_layer_create(GRect(5, 65, DISPLAY_WIDTH - 5, 28));
+    txt_header_bg = text_layer_create(GRect(0, 0, DISPLAY_WIDTH, 93));
 	
 	// Set text font
 	text_layer_set_font(txt_line, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
@@ -291,6 +297,7 @@ void init() {
 	text_layer_set_font(txt_status, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	
 	// Add text to window
+    layer_add_child(window_layer, text_layer_get_layer(txt_header_bg));
 	layer_add_child(window_layer, text_layer_get_layer(txt_line));
 	layer_add_child(window_layer, text_layer_get_layer(txt_stop));
     layer_add_child(window_layer, text_layer_get_layer(txt_direction));
