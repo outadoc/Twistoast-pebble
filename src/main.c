@@ -139,11 +139,17 @@ void display_schedule_info(StopInfo info) {
     
     #ifdef PBL_COLOR
         if(info.color == 0x00) {
-             //window_set_background_color(window, GColorWhite);
-            text_layer_set_background_color(txt_header_bg, GColorWhite);
+            text_layer_set_background_color(txt_header_bg, GColorBlack);
+    
+            text_layer_set_text_color(txt_line, GColorWhite);
+            text_layer_set_text_color(txt_stop, GColorWhite);
+            text_layer_set_text_color(txt_direction, GColorWhite);
         } else {
-            //window_set_background_color(window, GColorFromHEX(info.color));
             text_layer_set_background_color(txt_header_bg, GColorFromHEX(info.color));
+    
+            text_layer_set_text_color(txt_line, GColorBlack);
+            text_layer_set_text_color(txt_stop, GColorBlack);
+            text_layer_set_text_color(txt_direction, GColorBlack);
         }
     #endif
 }
@@ -224,6 +230,7 @@ void clear_labels() {
 void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "message received");
 	
+    // Retrieve all needed data
 	Tuple* type     = dict_find(iter, KEY_TWISTOAST_MESSAGE_TYPE);
 	Tuple* line     = dict_find(iter, KEY_BUS_LINE_NAME);
 	Tuple* dir      = dict_find(iter, KEY_BUS_DIRECTION_NAME);
@@ -238,7 +245,7 @@ void app_message_received_handler(DictionaryIterator *iter, void *context) {
 	if(type != NULL && type->value->int8 == BUS_STOP_DATA_RESPONSE 
 	   && line != NULL && dir != NULL && stop != NULL && sch1 != NULL && sch2 != NULL 
        && sch1_dir != NULL && sch2_dir != NULL) {
-		//decide if we should make the pebble vibrate
+		// Decide if we should make the pebble vibrate
 		if(vibrate != NULL && vibrate->value->int8 == 1) {
 			APP_LOG(APP_LOG_LEVEL_DEBUG, "vibrating!");
 			vibes_double_pulse();
@@ -287,7 +294,9 @@ void init() {
 	txt_direction = text_layer_create(GRect(5, 57, DISPLAY_WIDTH - 5, 35));
 	txt_schedule1 = text_layer_create(GRect(10, 95, DISPLAY_WIDTH - 10, 35));
 	txt_schedule2 = text_layer_create(GRect(10, 125, DISPLAY_WIDTH - 10, 35));
-	txt_status = text_layer_create(GRect(5, 65, DISPLAY_WIDTH - 5, 28));
+	txt_status = text_layer_create(GRect(5, 115, DISPLAY_WIDTH - 5, 28));
+    
+    // Text layer used as a header background to give the top half some color
     txt_header_bg = text_layer_create(GRect(0, 0, DISPLAY_WIDTH, 93));
 	
 	// Set text font
@@ -311,10 +320,17 @@ void init() {
     text_layer_set_background_color(txt_line, GColorClear);
     text_layer_set_background_color(txt_stop, GColorClear);
     text_layer_set_background_color(txt_direction, GColorClear);
-    text_layer_set_background_color(txt_schedule1, GColorClear);
-    text_layer_set_background_color(txt_schedule2, GColorClear);
-    text_layer_set_background_color(txt_status, GColorClear);
+
+    // If we're not on a color Pebble, display the header as white on black
+    #ifndef PBL_COLOR
+        text_layer_set_background_color(txt_header_bg, GColorBlack);
+    
+        text_layer_set_text_color(txt_line, GColorWhite);
+        text_layer_set_text_color(txt_stop, GColorWhite);
+        text_layer_set_text_color(txt_direction, GColorWhite);
+    #endif
 	
+    // Set click listener
 	window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
 	
 	// Get bus index in persistant memory
