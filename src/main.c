@@ -121,13 +121,16 @@ void get_schedule_info() {
 
 void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char* schedule_dir) {
     int seconds = (int) millis_before_bus / 1000;
-    char dir[4];
+    
+    // Reset the schedule string
+    schedule_str[0] = '\0';
         
     // If schedule_dir[0] is a capital letter, add it to the front of the string (it's the line)
     if(schedule_dir[0] >= 65 && schedule_dir[0] <= 90) {
-        snprintf(dir, 4, "%c: ", schedule_dir[0]);
-    } else {
-        dir[0] = '\0';
+        schedule_str[0] = schedule_dir[0];
+        schedule_str[1] = ':';
+        schedule_str[2] = ' ';
+        schedule_str[3] = '\0';
     }
     
     // Get the actual absolute time of the schedule
@@ -136,19 +139,37 @@ void format_schedule_string(char* schedule_str, int32_t millis_before_bus, char*
         
     if(millis_before_bus == -1) {
         // No stop for this bus
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "Pas d'arrêt");
+        strncpy(schedule_str, "Pas d'arrêt", SCHEDULE_STR_SIZE);
     } else if(seconds <= 0) {
         // Currently at stop
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sÀ l'arrêt", dir);
+        strncat(schedule_str, "À l'arrêt", SCHEDULE_STR_SIZE);
     } else if(seconds <= 60) {
         // Bus is incoming
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%sImminent", dir);
+        strncat(schedule_str, "Imminent", SCHEDULE_STR_SIZE);
     } else if(seconds > 3600) {
         // Display absolute time because the bus isn't coming any time soon
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%02d:%02d", dir, stop_time_info->tm_hour, stop_time_info->tm_min);
+        char time_str[] = "00:00 AM";
+        
+        if(clock_is_24h_style()) {
+            // Display as 15:00
+            strftime(time_str, sizeof(time_str), "%R", stop_time_info);
+        } else {
+            // Display as 03:00 PM
+            strftime(time_str, sizeof(time_str), "%I:%M %p", stop_time_info);
+        }
+        
+        strncpy(schedule_str, time_str, SCHEDULE_STR_SIZE);
     } else {
         // Just display a countdown!
-        snprintf(schedule_str, SCHEDULE_STR_SIZE, "%s%d minutes", dir, seconds / 60);
+        // Write the remaining minutes to time_str
+        char time_str[] = "00 ";
+        snprintf(time_str, sizeof(time_str), "%d ", seconds / 60);
+        
+        // Copy time_str to schedule_str ("A: 00 ")
+        strncat(schedule_str, time_str, SCHEDULE_STR_SIZE);
+        
+        // Add "minutes" at the end of the string
+        strncat(schedule_str, "minutes", SCHEDULE_STR_SIZE);
     }
 }
 
