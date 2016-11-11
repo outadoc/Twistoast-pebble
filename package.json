@@ -1,0 +1,33 @@
+{
+    "author": "outa[dev]",
+    "dependencies": {},
+    "keywords": [],
+    "name": "twistoast",
+    "pebble": {
+        "displayName": "Twistoast",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/pbl_icon.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_TWISTO",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "020f9398-c407-454b-996c-6ac341337281",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "2.0.0"
+}
